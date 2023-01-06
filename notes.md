@@ -12,7 +12,5 @@ diagram:
 				LINK LAYER
 				arp, mac (ethernet, wifi ..)
 
-# TCP
-- set up socket
-- bind socket to local addr
-- set socket to 'listen'
+setup:
+				SOCKET -> BIND -> LISTEN -> ACCEPT -> READ/WRITE
