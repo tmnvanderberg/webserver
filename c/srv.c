@@ -1,9 +1,9 @@
 #include <arpa/inet.h>
 #include <errno.h>
 #include <stdio.h>
+#include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#include <string.h>
 
 #define BUFFER_SIZE 2048
 
@@ -44,6 +44,10 @@ int main() {
                 "Server: webserver-c\r\n"
                 "Content-type: text/html\r\n\r\n"
                 "<html>hello, world</html>\r\n";
+
+  struct sockaddr_in client_addr;
+  int client_addrlen = sizeof(client_addr);
+
   while (1) {
     // == accept incoming connection on new socket == //
     int new_socket_fd = accept(socket_fd, (struct sockaddr *)&host_addr,
@@ -54,12 +58,26 @@ int main() {
     }
     printf("connection accepted \n");
 
+    // == get client addr == //
+    int sockname = getsockname(new_socket_fd, (struct sockaddr *)&client_addr,
+                               (socklen_t *)&client_addrlen);
+
+    if (sockname < 0) {
+      perror("webserver (getsockname)");
+      continue;
+    }
+
     // == read from socket == //
     int read_ret = read(new_socket_fd, buffer, BUFFER_SIZE);
     if (read_ret < 0) {
       perror("webserver (read)\n");
       continue;
     }
+
+    char method[BUFFER_SIZE], uri[BUFFER_SIZE], version[BUFFER_SIZE];
+    sscanf(buffer, "%s %s %s", method, uri, version);
+    printf("[%s:%u] %s %s %s \n", inet_ntoa(client_addr.sin_addr),
+           ntohs(client_addr.sin_port), method, version, uri);
 
     // == write to socket == //
     int write_ret = write(new_socket_fd, resp, strlen(resp));
