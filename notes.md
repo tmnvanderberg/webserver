@@ -1,5 +1,6 @@
 - protocols: HTTP, TCP/IP
 diagram:
+
 				APPLICATION LAYER
 				http, ftp, smtp, ssh,...
 
@@ -13,4 +14,5 @@ diagram:
 				arp, mac (ethernet, wifi ..)
 
 setup:
+
 				SOCKET -> BIND -> LISTEN -> ACCEPT -> READ/WRITE
