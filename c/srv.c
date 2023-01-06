@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <sys/socket.h>
 #include <unistd.h>
+#include <string.h>
+
+#define BUFFER_SIZE 2048
 
 int main() {
   // == create socket == //
@@ -36,8 +39,13 @@ int main() {
   }
   printf("socket listening for connections\n");
 
-  // == accept incoming connections == //
+  char buffer[BUFFER_SIZE];
+  char resp[] = "HTTP/1.0 200 OK\r\n"
+                "Server: webserver-c\r\n"
+                "Content-type: text/html\r\n\r\n"
+                "<html>hello, world</html>\r\n";
   while (1) {
+    // == accept incoming connection on new socket == //
     int new_socket_fd = accept(socket_fd, (struct sockaddr *)&host_addr,
                                (socklen_t *)&host_addrlen);
     if (new_socket_fd < 0) {
@@ -45,7 +53,23 @@ int main() {
       continue;
     }
     printf("connection accepted \n");
+
+    // == read from socket == //
+    int read_ret = read(new_socket_fd, buffer, BUFFER_SIZE);
+    if (read_ret < 0) {
+      perror("webserver (read)\n");
+      continue;
+    }
+
+    // == write to socket == //
+    int write_ret = write(new_socket_fd, resp, strlen(resp));
+    if (write_ret < 0) {
+      perror("webserver (write)\n");
+      continue;
+    }
+
     close(new_socket_fd);
   }
+
   return 0;
 }
