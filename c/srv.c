@@ -36,5 +36,16 @@ int main() {
   }
   printf("socket listening for connections\n");
 
+  // == accept incoming connections == //
+  while (1) {
+    int new_socket_fd = accept(socket_fd, (struct sockaddr *)&host_addr,
+                               (socklen_t *)&host_addrlen);
+    if (new_socket_fd < 0) {
+      perror("webserver (accept)\n");
+      continue;
+    }
+    printf("connection accepted \n");
+    close(new_socket_fd);
+  }
   return 0;
 }
